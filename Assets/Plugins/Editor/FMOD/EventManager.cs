@@ -13,7 +13,7 @@ namespace FMODUnity
     public class EventManager : MonoBehaviour
     {
         const string CacheAssetName = "FMODStudioCache";
-        const string CacheAssetFullName = "Assets/" + CacheAssetName + ".asset";
+        const string CacheAssetFullName = "Assets/Editor/FMOD/" + CacheAssetName + ".asset";
         static EventCache eventCache;
 
         const string StringBankExtension = "strings.bank";
@@ -41,7 +41,13 @@ namespace FMODUnity
                 {
                     UnityEngine.Debug.Log("FMOD Studio: Cannot find serialized event cache, creating new instance");
                     eventCache = ScriptableObject.CreateInstance<EventCache>();
-                    
+
+                    string cacheFolderPath = Path.GetDirectoryName(Path.Combine(Application.dataPath.Replace("Assets", string.Empty), CacheAssetFullName));
+                    if (!Directory.Exists(cacheFolderPath))
+                    {
+                        Directory.CreateDirectory(cacheFolderPath);
+                    }
+
                     AssetDatabase.CreateAsset(eventCache, CacheAssetFullName);
                 }
             }
