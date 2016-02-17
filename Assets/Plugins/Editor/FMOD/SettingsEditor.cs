@@ -436,10 +436,25 @@ namespace FMODUnity
             EditorGUILayout.Separator();
             EditorGUILayout.LabelField("<b>Loading</b>", style);
             EditorGUI.indentLevel++;
-            settings.AutomaticEventLoading = EditorGUILayout.Toggle("Load All Event Data at Initialization", settings.AutomaticEventLoading);
-            EditorGUI.BeginDisabledGroup(!settings.AutomaticEventLoading);
-            settings.AutomaticSampleLoading = EditorGUILayout.Toggle("Load All Sample Data at Initialization", settings.AutomaticSampleLoading);
-            EditorGUI.EndDisabledGroup();
+
+            bool newValueAutomaticIncorporateBanks = EditorGUILayout.Toggle("Include All Banks in the Build", settings.AutomaticIncorporateBanks);
+
+            if (newValueAutomaticIncorporateBanks != settings.AutomaticIncorporateBanks && !newValueAutomaticIncorporateBanks)
+            {
+                settings.AutomaticEventLoading = false;
+                settings.AutomaticSampleLoading = false;
+            }
+
+            settings.AutomaticIncorporateBanks = newValueAutomaticIncorporateBanks;
+
+            if (settings.AutomaticIncorporateBanks)
+            {
+                settings.AutomaticEventLoading = EditorGUILayout.Toggle("Load All Event Data at Initialization", settings.AutomaticEventLoading);
+                EditorGUI.BeginDisabledGroup(!settings.AutomaticEventLoading);
+                settings.AutomaticSampleLoading = EditorGUILayout.Toggle("Load All Sample Data at Initialization", settings.AutomaticSampleLoading);
+                EditorGUI.EndDisabledGroup();
+            }
+
             EditorGUI.indentLevel--;
 
 

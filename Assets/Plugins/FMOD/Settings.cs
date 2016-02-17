@@ -127,13 +127,15 @@ namespace FMODUnity
 
         [SerializeField]
         public string SourceBankPath;
-        
+
+        [SerializeField]
+        public bool AutomaticIncorporateBanks;
+
         [SerializeField]
         public bool AutomaticEventLoading;
 
         [SerializeField]
         public bool AutomaticSampleLoading;
-
 
         [SerializeField]
         public List<PlatformIntSetting> SpeakerModeSettings;
@@ -317,6 +319,7 @@ namespace FMODUnity
             SetSetting(SampleRateSettings, FMODPlatform.Default, 0);
             SetSetting(SpeakerModeSettings, FMODPlatform.Default, (int) FMOD.SPEAKERMODE.STEREO);
 
+            AutomaticIncorporateBanks = true;
             AutomaticEventLoading = true;
             AutomaticSampleLoading = false;
         }

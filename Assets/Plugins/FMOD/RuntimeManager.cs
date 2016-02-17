@@ -234,35 +234,38 @@ namespace FMODUnity
                 }
 
                 // Always load strings bank
-                try
-                { 
-                    LoadBank(fmodSettings.MasterBank + ".strings", fmodSettings.AutomaticSampleLoading);
-                }
-                catch (BankLoadException e)
-                {
-                    UnityEngine.Debug.LogException(e);
-                }
-
-                if (fmodSettings.AutomaticEventLoading)
+                if (fmodSettings.AutomaticIncorporateBanks)
                 {
                     try
-                    {
-                        LoadBank(fmodSettings.MasterBank, fmodSettings.AutomaticSampleLoading);
+                    { 
+                        LoadBank(fmodSettings.MasterBank + ".strings", fmodSettings.AutomaticSampleLoading);
                     }
                     catch (BankLoadException e)
                     {
                         UnityEngine.Debug.LogException(e);
                     }
-
-                    foreach (var bank in fmodSettings.Banks)
+                
+                    if (fmodSettings.AutomaticEventLoading)
                     {
                         try
                         {
-                            LoadBank(bank, fmodSettings.AutomaticSampleLoading);
+                            LoadBank(fmodSettings.MasterBank, fmodSettings.AutomaticSampleLoading);
                         }
                         catch (BankLoadException e)
                         {
                             UnityEngine.Debug.LogException(e);
+                        }
+
+                        foreach (var bank in fmodSettings.Banks)
+                        {
+                            try
+                            {
+                                LoadBank(bank, fmodSettings.AutomaticSampleLoading);
+                            }
+                            catch (BankLoadException e)
+                            {
+                                UnityEngine.Debug.LogException(e);
+                            }
                         }
                     }
                 }
@@ -381,6 +384,47 @@ namespace FMODUnity
 					lowlevelSystem.mixerResume();
 				}
 			}
+        }
+
+        public static void LoadBank(string bankName, byte[] bytes, bool loadSamples = false)
+        {
+            if (Instance.loadedBanks.ContainsKey(bankName))
+            {
+                LoadedBank loadedBank = Instance.loadedBanks[bankName];
+                loadedBank.RefCount++;
+
+                if (loadSamples)
+                {
+                    loadedBank.Bank.loadSampleData();
+                }
+            }
+            else
+            {
+                LoadedBank loadedBank = new LoadedBank();
+                FMOD.RESULT loadResult = Instance.studioSystem.loadBankMemory(bytes, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out loadedBank.Bank);
+
+                if (loadResult == FMOD.RESULT.OK)
+                {
+                    loadedBank.RefCount = 1;
+                    Instance.loadedBanks.Add(bankName, loadedBank);
+
+                    if (loadSamples)
+                    {
+                        loadedBank.Bank.loadSampleData();
+                    }
+                }
+                else if (loadResult == FMOD.RESULT.ERR_EVENT_ALREADY_LOADED)
+                {
+                    // someone loaded this bank directly using the studio API
+                    // TODO: will the null bank handle be an issue
+                    loadedBank.RefCount = 2;
+                    Instance.loadedBanks.Add(bankName, loadedBank);                    
+                }
+                else
+                {
+                    throw new BankLoadException(bankName, loadResult);
+                }
+            }
         }
 
         public static void LoadBank(string bankName, bool loadSamples = false)

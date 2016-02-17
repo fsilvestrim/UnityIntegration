@@ -345,6 +345,11 @@ namespace FMODUnity
 
         public static void CopyToStreamingAssets()
         {
+            if (!Settings.Instance.AutomaticIncorporateBanks)
+            {
+                return;
+            }
+
             FMODPlatform platform = EditorUtils.GetFMODPlatform(EditorUserBuildSettings.activeBuildTarget);
             if (platform == FMODPlatform.None)
             {
